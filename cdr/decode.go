@@ -19,10 +19,13 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 
 	"github.com/kaitai-io/kaitai_struct_go_runtime/kaitai"
+	"github.com/mikefarah/yq/v4/pkg/yqlib"
+	"gopkg.in/op/go-logging.v1"
 )
 
 func GetContent(filename string) []byte {
@@ -77,20 +80,6 @@ func ToFileHeaderInfo(content []byte) FileHeaderInfo {
 	}
 }
 
-func PrintFileHeaderInfo(info FileHeaderInfo) {
-	fmt.Printf("File length: %d\n", info.FileLength)
-	fmt.Printf("Header length: %d\n", info.HeaderLength)
-	fmt.Printf("High release/version identifier: %s\n", info.HighReleaseVersion)
-	fmt.Printf("Low release/version identifier: %s\n", info.LowReleaseVersion)
-	fmt.Printf("File opening timestamp: %s\n", info.FileOpeningTimestamp)
-	fmt.Printf("Last CDR append timestamp: %s\n", info.LastCDRAppendTimestamp)
-	fmt.Printf("Number of CDRs in file: %d\n", info.NumberOfCDRsInFile)
-	fmt.Printf("File sequence number: %d\n", info.FileSequenceNumber)
-	fmt.Printf("File closure trigger reason: %s\n", info.FileClosureTriggerReason)
-	fmt.Printf("Node IP address: %s\n", info.NodeIPAddress)
-	fmt.Printf("Lost CDR indicator: %s\n", info.LostCDRIndicator)
-}
-
 func ToCdrHeaderInfo(content []byte, index uint32) CdrHeaderInfo {
 	row := getCdrContent(content, index)
 	return CdrHeaderInfo{
@@ -99,13 +88,6 @@ func ToCdrHeaderInfo(content []byte, index uint32) CdrHeaderInfo {
 		DataRecorderFormat: toCdrEncoding(row.DataRecordFormat),
 		TsNumber:           toTsNumber(row.TsNumber),
 	}
-}
-
-func PrintCdrHeaderInfo(info CdrHeaderInfo) {
-	fmt.Printf("CDR length: %d\n", info.CdrLength)
-	fmt.Printf("Release version: %s\n", info.ReleaseVersion)
-	fmt.Printf("Data record format: %s\n", info.DataRecorderFormat)
-	fmt.Printf("TS number: %s\n", info.TsNumber)
 }
 
 func CountCdrs(content []byte) uint32 {
@@ -139,6 +121,48 @@ func ToFileInfo(content []byte) FileInfo {
 	return FileInfo{
 		HeaderInfo: ToFileHeaderInfo(content),
 		CdrInfo:    ToCdrInfo(content),
+	}
+}
+
+func PrettyPrintYAML(json []byte) {
+	backend := logging.SetBackend(logging.NewLogBackend(os.Stderr, "", log.LstdFlags))
+	backend.SetLevel(logging.CRITICAL, "")
+	yqlib.GetLogger().SetBackend(backend)
+	decoder := yqlib.NewJSONDecoder()
+	decoder.Init(bytes.NewReader(json))
+	node, err := decoder.Decode()
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(-1)
+	}
+	prefs := yqlib.NewDefaultYamlPreferences()
+	prefs.ColorsEnabled = true
+	enc := yqlib.NewYamlEncoder(prefs)
+	err = enc.Encode(os.Stdout, node)
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(-1)
+	}
+}
+
+func PrettyPrintJSON(json []byte) {
+	backend := logging.SetBackend(logging.NewLogBackend(os.Stderr, "", log.LstdFlags))
+	backend.SetLevel(logging.CRITICAL, "")
+	yqlib.GetLogger().SetBackend(backend)
+	decoder := yqlib.NewJSONDecoder()
+	decoder.Init(bytes.NewReader(json))
+	node, err := decoder.Decode()
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(-1)
+	}
+	prefs := yqlib.NewDefaultJsonPreferences()
+	prefs.ColorsEnabled = true
+	enc := yqlib.NewJSONEncoder(prefs)
+	err = enc.Encode(os.Stdout, node)
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(-1)
 	}
 }
 

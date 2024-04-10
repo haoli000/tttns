@@ -43,15 +43,15 @@ var headerCmd = &cobra.Command{
 
 		content := cdr.GetContent(args[0])
 		info := cdr.ToCdrHeaderInfo(content, uint32(index))
+		jsonBytes, err := json.MarshalIndent(info, "", "    ")
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
 		if jsonOutput, _ := cmd.Flags().GetBool("json"); jsonOutput {
-			jsonBytes, err := json.MarshalIndent(info, "", "    ")
-			if err != nil {
-				fmt.Println("Error:", err)
-				os.Exit(1)
-			}
-			fmt.Println(string(jsonBytes))
+			cdr.PrettyPrintJSON(jsonBytes)
 		} else {
-			cdr.PrintCdrHeaderInfo(info)
+			cdr.PrettyPrintYAML(jsonBytes)
 		}
 	},
 }

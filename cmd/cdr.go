@@ -31,21 +31,16 @@ var cdrCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		content := cdr.GetContent(args[0])
+		cdrInfo := cdr.ToCdrInfo(content)
+		jsonBytes, err := json.MarshalIndent(cdrInfo, "", "    ")
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
 		if jsonOutput, _ := cmd.Flags().GetBool("json"); jsonOutput {
-			cdrInfo := cdr.ToCdrInfo(content)
-			jsonBytes, err := json.MarshalIndent(cdrInfo, "", "    ")
-			if err != nil {
-				fmt.Println("Error:", err)
-				os.Exit(1)
-			}
-			fmt.Println(string(jsonBytes))
+			cdr.PrettyPrintJSON(jsonBytes)
 		} else {
-			cnt := cdr.CountCdrs(content)
-			fmt.Printf("Number of CDRs: %d\n", cnt)
-			for i := uint32(1); i <= cnt; i++ {
-				info := cdr.ToCdrHeaderInfo(content, i)
-				cdr.PrintCdrHeaderInfo(info)
-			}
+			cdr.PrettyPrintYAML(jsonBytes)
 		}
 	},
 }

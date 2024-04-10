@@ -38,9 +38,9 @@ var fileCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		if jsonOutput, _ := cmd.Flags().GetBool("json"); jsonOutput {
-			fmt.Println(string(jsonBytes))
+			cdr.PrettyPrintJSON(jsonBytes)
 		} else {
-			cdr.PrintFileHeaderInfo(info)
+			cdr.PrettyPrintYAML(jsonBytes)
 		}
 	},
 }

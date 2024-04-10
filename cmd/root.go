@@ -33,23 +33,16 @@ The name is plainly from the first letters of 32297.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		content := cdr.GetContent(args[0])
+		fileInfo := cdr.ToFileInfo(content)
+		jsonBytes, err := json.MarshalIndent(fileInfo, "", "    ")
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
 		if jsonOutput, _ := cmd.Flags().GetBool("json"); jsonOutput {
-			fileInfo := cdr.ToFileInfo(content)
-			jsonBytes, err := json.MarshalIndent(fileInfo, "", "    ")
-			if err != nil {
-				fmt.Println("Error:", err)
-				os.Exit(1)
-			}
-			fmt.Println(string(jsonBytes))
+			cdr.PrettyPrintJSON(jsonBytes)
 		} else {
-			fileInfo := cdr.ToFileHeaderInfo(content)
-			cdr.PrintFileHeaderInfo(fileInfo)
-			cnt := cdr.CountCdrs(content)
-			fmt.Printf("Number of CDRs: %d\n", cnt)
-			for i := uint32(1); i <= cnt; i++ {
-				info := cdr.ToCdrHeaderInfo(content, i)
-				cdr.PrintCdrHeaderInfo(info)
-			}
+			cdr.PrettyPrintYAML(jsonBytes)
 		}
 	}}
 
