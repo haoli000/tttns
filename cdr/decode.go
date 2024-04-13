@@ -124,6 +124,15 @@ func ToFileInfo(content []byte) FileInfo {
 	}
 }
 
+func isOutputToTerminal() bool {
+	o, _ := os.Stdout.Stat()
+	if (o.Mode() & os.ModeCharDevice) == os.ModeCharDevice { //Terminal
+		//Display info to the terminal
+		return true
+	}
+	return false
+}
+
 func PrettyPrintYAML(json []byte) {
 	backend := logging.SetBackend(logging.NewLogBackend(os.Stderr, "", log.LstdFlags))
 	backend.SetLevel(logging.CRITICAL, "")
@@ -136,7 +145,7 @@ func PrettyPrintYAML(json []byte) {
 		os.Exit(-1)
 	}
 	prefs := yqlib.NewDefaultYamlPreferences()
-	prefs.ColorsEnabled = true
+	prefs.ColorsEnabled = isOutputToTerminal()
 	enc := yqlib.NewYamlEncoder(prefs)
 	err = enc.Encode(os.Stdout, node)
 	if err != nil {
@@ -157,7 +166,7 @@ func PrettyPrintJSON(json []byte) {
 		os.Exit(-1)
 	}
 	prefs := yqlib.NewDefaultJsonPreferences()
-	prefs.ColorsEnabled = true
+	prefs.ColorsEnabled = isOutputToTerminal()
 	enc := yqlib.NewJSONEncoder(prefs)
 	err = enc.Encode(os.Stdout, node)
 	if err != nil {
