@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// For an introduction to this package, see the docs:
+//
+// [docs]: https://github.com/haoli000/tttns/tree/main/docs
 package main
 
 import "github.com/haoli000/tttns/cmd"

@@ -25,7 +25,7 @@ import (
 )
 
 // rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "tttns [file|-]",
 	Short: "3GPP TS 32.297 cdr decoder",
 	Long: `A cli tool to inspect 3GPP TS 32.297 CDR files.
@@ -47,12 +47,12 @@ The name is plainly from the first letters of 32297.`,
 	}}
 
 func Execute() {
-	err := rootCmd.Execute()
+	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	rootCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
+	RootCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
 }

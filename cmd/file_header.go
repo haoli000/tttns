@@ -47,5 +47,5 @@ var fileCmd = &cobra.Command{
 
 func init() {
 	fileCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
-	rootCmd.AddCommand(fileCmd)
+	RootCmd.AddCommand(fileCmd)
 }

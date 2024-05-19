@@ -47,5 +47,5 @@ var cdrCmd = &cobra.Command{
 
 func init() {
 	cdrCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
-	rootCmd.AddCommand(cdrCmd)
+	RootCmd.AddCommand(cdrCmd)
 }
