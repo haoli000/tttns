@@ -14,9 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// For an introduction to this package, see the docs:
+// For an introduction to this cli tool, see the [docs].
+// To decode the dumped CDR contents, another cli tool [xchf] can be used.
 //
 // [docs]: https://github.com/haoli000/tttns/tree/main/docs
+// [xchf]: https://github.com/haoli000/xchf
 package main
 
 import "github.com/haoli000/tttns/cmd"
