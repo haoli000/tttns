@@ -24,15 +24,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "tttns [file|-]",
 	Short: "3GPP TS 32.297 cdr decoder",
 	Long: `A cli tool to inspect 3GPP TS 32.297 CDR files.
-The name is plainly from the first letters of 32297.`,
-	Args: cobra.ExactArgs(1),
+The name is simply derived from the first letters of 32297.`,
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		content := cdr.GetContent(args[0])
+		fileName := "-"
+		if len(args) > 0 {
+			fileName = args[0]
+		}
+		content := cdr.GetContent(fileName)
 		fileInfo := cdr.ToFileInfo(content)
 		jsonBytes, err := json.MarshalIndent(fileInfo, "", "    ")
 		if err != nil {
@@ -46,13 +49,19 @@ The name is plainly from the first letters of 32297.`,
 		}
 	}}
 
-func Execute() {
+func Execute(version string) {
+	var versionCmd = &cobra.Command{
+		Use:   "version",
+		Short: "Print the version number of tttns",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("Version: %s\n", version)
+		},
+	}
+	RootCmd.AddCommand(versionCmd)
+	RootCmd.Flags().BoolP("json", "j", false, "Output in JSON format except for cdr dump")
+
 	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
-}
-
-func init() {
-	RootCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
 }

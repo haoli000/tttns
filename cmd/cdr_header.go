@@ -27,12 +27,22 @@ import (
 
 // headerCmd represents the header command
 var headerCmd = &cobra.Command{
-	Use:   "header [file|-] [index]",
+	Use:   "header [file|-] [index|1]",
 	Short: "Print CDR header info",
-	Args:  cobra.ExactArgs(2),
+	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		index, err := strconv.ParseUint(args[1], 10, 32)
-		if err != nil {
+		fileName := "-"
+		indexArg := "1"
+		if len(args) == 1 {
+			indexArg = args[0]
+		} else if len(args) > 1 {
+			fileName = args[0]
+			indexArg = args[1]
+		}
+		index, err := strconv.ParseUint(indexArg, 10, 32)
+		if indexArg == "-" && len(args) == 1 {
+			index = 1
+		} else if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(3)
 		}
@@ -41,7 +51,7 @@ var headerCmd = &cobra.Command{
 			os.Exit(3)
 		}
 
-		content := cdr.GetContent(args[0])
+		content := cdr.GetContent(fileName)
 		info := cdr.ToCdrHeaderInfo(content, uint32(index))
 		jsonBytes, err := json.MarshalIndent(info, "", "    ")
 		if err != nil {

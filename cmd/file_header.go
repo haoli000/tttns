@@ -28,9 +28,13 @@ import (
 var fileCmd = &cobra.Command{
 	Use:   "file [file|-]",
 	Short: "Print CDR file header info",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		content := cdr.GetContent(args[0])
+		fileName := "-"
+		if len(args) > 0 {
+			fileName = args[0]
+		}
+		content := cdr.GetContent(fileName)
 		info := cdr.ToFileHeaderInfo(content)
 		jsonBytes, err := json.MarshalIndent(info, "", "    ")
 		if err != nil {

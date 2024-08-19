@@ -26,9 +26,13 @@ import (
 var countCmd = &cobra.Command{
 	Use:   "count [file|-]",
 	Short: "Get number of CDRs file",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		content := cdr.GetContent(args[0])
+		fileName := "-"
+		if len(args) > 0 {
+			fileName = args[0]
+		}
+		content := cdr.GetContent(fileName)
 		fmt.Println(cdr.CountCdrs(content))
 	},
 }

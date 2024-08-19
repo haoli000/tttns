@@ -26,33 +26,31 @@ import (
 
 // dumpCmd represents the dump command
 var dumpCmd = &cobra.Command{
-	Use:   "dump [input_file|-] [index] [output_file]",
-	Short: "Dump the row content of CDR to output file or stdout",
-	Args:  cobra.RangeArgs(2, 3),
+	Use:   "dump [input_file|-] [index|1]",
+	Short: "Dump the row content of CDR to stdout",
+	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		index, err := strconv.ParseUint(args[1], 10, 32)
-		if err != nil {
+		fileName := "-"
+		indexArg := "1"
+		if len(args) == 1 {
+			indexArg = args[0]
+		} else if len(args) > 1 {
+			fileName = args[0]
+			indexArg = args[1]
+		}
+		index, err := strconv.ParseUint(indexArg, 10, 32)
+		if indexArg == "-" && len(args) == 1 {
+			index = 1
+		} else if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(4)
 		}
 		if index < 1 || index > (1<<32)-1 {
-			fmt.Println("Error: Index must be an integer starting from 1")
+			fmt.Println("Error: Index must be an integer greater than or equal to 1")
 			os.Exit(4)
 		}
-		content := cdr.GetContent(args[0])
-
-		if len(args) == 2 {
-			cdr.DumpCdr(content, uint32(index), os.Stdout)
-		} else if len(args) == 3 {
-			filename := args[2]
-			file, err := os.Create(filename)
-			if err != nil {
-				fmt.Println("Error opening file:", err)
-				os.Exit(4)
-			}
-			defer file.Close()
-			cdr.DumpCdr(content, uint32(index), file)
-		}
+		content := cdr.GetContent(fileName)
+		cdr.DumpCdr(content, uint32(index), os.Stdout)
 	},
 }
 

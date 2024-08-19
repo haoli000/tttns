@@ -31,6 +31,16 @@ import (
 func GetContent(filename string) []byte {
 	var inputReader io.Reader
 	if filename == "-" {
+		// Check if stdin has data
+		fi, err := os.Stdin.Stat()
+		if err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, "Error checking stdin:", err)
+			os.Exit(1)
+		}
+		if (fi.Mode() & os.ModeCharDevice) != 0 {
+			_, _ = fmt.Fprintln(os.Stderr, "Error: No data available on stdin")
+			os.Exit(1)
+		}
 		// Read from stdin
 		inputReader = os.Stdin
 	} else {
