@@ -23,6 +23,7 @@ builds:
       - linux
       - darwin
     ldflags:
+      - -X main.version={{.Version}}
       - -X github.com/haoli000/tttns/generated/buildinfo.buildDate={{.CommitDate}}
       - -X github.com/haoli000/tttns/generated/buildinfo.buildVersion={{.Version}}
       - -X github.com/haoli000/tttns/generated/buildinfo.commit={{.ShortCommit}}
