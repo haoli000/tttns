@@ -11,7 +11,7 @@ main() {
 
 	# this is quite ugly, but this way we do not depend on the json parse, nor do we depend
 	# on any particular formatting, just the value
-	version=$(curl -s https://api.github.com/repos/haoli000/tttns/releases/latest | grep -o 'https://github.com/haoli000/tttns/releases/tag/v[0-9.]*' | grep -o 'v[0-9.]*$')
+	version=$(curl -s https://api.github.com/repos/haoli000/tttns/releases/latest | sed -n 's/.*"tag_name": *"\(v[0-9.]*\)".*/\1/p')
 
 	if [ ! -z $1 ]; then
 		version="v$1"
