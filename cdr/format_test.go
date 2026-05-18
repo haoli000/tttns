@@ -1,7 +1,6 @@
 package cdr
 
 import (
-	"os"
 	"strings"
 	"testing"
 )
@@ -97,13 +96,36 @@ func TestToCdrEncoding(t *testing.T) {
 
 func TestToTsNumber(t *testing.T) {
 	tests := []struct {
-		input    ThreegppCdr_Cdr_Ts
+		input    uint8
 		expected string
 	}{
 		{0, "TS32.005"},
 		{1, "TS32.015"},
+		{2, "TS32.205"},
+		{3, "TS32.215"},
+		{4, "TS32.225"},
+		{5, "TS32.235"},
+		{6, "TS32.250"},
 		{7, "TS32.251"},
+		{9, "TS32.260"},
+		{10, "TS32.270"},
+		{11, "TS32.271"},
+		{12, "TS32.272"},
+		{13, "TS32.273"},
+		{14, "TS32.275"},
+		{15, "TS32.274"},
+		{16, "TS32.277"},
+		{17, "TS32.296"},
+		{18, "TS32.278"},
+		{19, "TS32.253"},
+		{20, "TS32.255"},
+		{21, "TS32.254"},
+		{22, "TS32.256"},
 		{23, "TS28.201"},
+		{24, "TS28.202"},
+		{25, "TS32.257"},
+		{26, "TS32.282"},
+		{8, "Unknown 8"},
 		{100, "Unknown 100"},
 	}
 	for _, tt := range tests {
@@ -114,97 +136,67 @@ func TestToTsNumber(t *testing.T) {
 	}
 }
 
-func TestToVersion(t *testing.T) {
+func TestFormatVersion(t *testing.T) {
 	tests := []struct {
 		name     string
-		rel      *ThreegppCdr_ReleaseVersionIdentifier
-		ext      *ThreegppCdr_ReleaseIdentifierExtension
+		rel      ReleaseVersion
+		ext      *uint8
 		expected string
 	}{
 		{
 			"normal release",
-			&ThreegppCdr_ReleaseVersionIdentifier{ReleaseIdentifier: 5, VersionIdentifier: 3, threegppRelease: 5},
+			ReleaseVersion{ReleaseIdentifier: 5, VersionIdentifier: 3},
 			nil,
 			"5.3",
 		},
 		{
 			"beyond 9",
-			&ThreegppCdr_ReleaseVersionIdentifier{ReleaseIdentifier: uint64(ThreegppCdr_ReleaseVersionIdentifier_Rel__Beyond9), VersionIdentifier: 2},
-			&ThreegppCdr_ReleaseIdentifierExtension{ThreegppRelease: 5},
+			ReleaseVersion{ReleaseIdentifier: 7, VersionIdentifier: 2},
+			uint8Ptr(5),
 			"15.2",
+		},
+		{
+			"release 7 without extension",
+			ReleaseVersion{ReleaseIdentifier: 7, VersionIdentifier: 1},
+			nil,
+			"7.1",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := toVersion(tt.rel, tt.ext)
+			result := formatVersion(tt.rel, tt.ext)
 			if result != tt.expected {
-				t.Errorf("toVersion() = %q, want %q", result, tt.expected)
+				t.Errorf("formatVersion() = %q, want %q", result, tt.expected)
 			}
 		})
 	}
 }
 
-func TestToTimeStamp(t *testing.T) {
+func uint8Ptr(v uint8) *uint8 { return &v }
+
+func TestFormatTimestamp(t *testing.T) {
 	tests := []struct {
 		name     string
-		ts       *ThreegppCdr_Timestamp
+		ts       Timestamp
 		expected string
 	}{
 		{
 			"positive offset",
-			&ThreegppCdr_Timestamp{Date: 15, Month: 3, Hour: 14, Minute: 30, Sign: true, HourDeviation: 2, MinuteDeviation: 0},
+			Timestamp{Day: 15, Month: 3, Hour: 14, Minute: 30, Sign: true, HourDeviation: 2, MinuteDeviation: 0},
 			"15/3 14:30:00+0200",
 		},
 		{
 			"negative offset",
-			&ThreegppCdr_Timestamp{Date: 1, Month: 12, Hour: 8, Minute: 5, Sign: false, HourDeviation: 5, MinuteDeviation: 30},
+			Timestamp{Day: 1, Month: 12, Hour: 8, Minute: 5, Sign: false, HourDeviation: 5, MinuteDeviation: 30},
 			"1/12 08:05:00-0530",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := toTimeStamp(tt.ts)
+			result := formatTimestamp(tt.ts)
 			if result != tt.expected {
-				t.Errorf("toTimeStamp() = %q, want %q", result, tt.expected)
+				t.Errorf("formatTimestamp() = %q, want %q", result, tt.expected)
 			}
 		})
-	}
-}
-
-func TestPrintOutput(t *testing.T) {
-	data := struct {
-		Name string `json:"name"`
-	}{Name: "test"}
-	// Just verify it doesn't panic
-	// (actual output goes to stdout, which is fine for a smoke test)
-	PrintOutput(true, data)
-	PrintOutput(false, data)
-}
-
-func TestGetContent(t *testing.T) {
-	expected := []byte{0x01, 0x02, 0x03}
-	f, err := os.CreateTemp("", "tttns-test-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.Remove(f.Name())
-	_, _ = f.Write(expected)
-	f.Close()
-
-	result := GetContent(f.Name())
-	if len(result) != len(expected) {
-		t.Errorf("GetContent() returned %d bytes, want %d", len(result), len(expected))
-	}
-	for i, b := range result {
-		if b != expected[i] {
-			t.Errorf("GetContent()[%d] = %d, want %d", i, b, expected[i])
-		}
-	}
-}
-
-func TestIsOutputToTerminal(t *testing.T) {
-	// When running under go test, stdout is not a terminal
-	if isOutputToTerminal() {
-		t.Error("isOutputToTerminal() should be false during tests")
 	}
 }

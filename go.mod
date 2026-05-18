@@ -4,7 +4,6 @@ go 1.26.1
 
 require (
 	github.com/can3p/kleiner v0.0.12
-	github.com/kaitai-io/kaitai_struct_go_runtime v0.10.0
 	github.com/mikefarah/yq/v4 v4.44.1
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
