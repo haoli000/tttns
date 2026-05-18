@@ -31,21 +31,23 @@ var dumpCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		fileName := "-"
-		indexArg := "1"
+		var index uint64 = 1
 		if len(args) == 1 {
-			indexArg = args[0]
+			if n, err := strconv.ParseUint(args[0], 10, 32); err == nil {
+				index = n
+			} else {
+				fileName = args[0]
+			}
 		} else if len(args) > 1 {
 			fileName = args[0]
-			indexArg = args[1]
+			n, err := strconv.ParseUint(args[1], 10, 32)
+			if err != nil {
+				fmt.Println("Error:", err)
+				os.Exit(4)
+			}
+			index = n
 		}
-		index, err := strconv.ParseUint(indexArg, 10, 32)
-		if indexArg == "-" && len(args) == 1 {
-			index = 1
-		} else if err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(4)
-		}
-		if index < 1 || index > (1<<32)-1 {
+		if index < 1 {
 			fmt.Println("Error: Index must be an integer greater than or equal to 1")
 			os.Exit(4)
 		}

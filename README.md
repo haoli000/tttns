@@ -1,16 +1,12 @@
 # tttns
 
-`tttns` is a command-line interface (CLI) tool designed to inspect 3GPP TS 32.297 CDR (Charging Data Record) files. The name "tttns" is derived from the first letters of "32297".
+A command-line tool to inspect 3GPP TS 32.297 CDR (Charging Data Record) files. The name is derived from the first letters of "32297".
+
+To decode the dumped CDR contents, the companion tool [xchf](https://github.com/haoli000/xchf) can be used.
 
 ## Installation
 
 ### Install Script
-
-Download `tttns` and install into a local bin directory.
-
-#### MacOS, Linux, WSL
-
-Latest version:
 
 ```bash
 curl -L https://raw.githubusercontent.com/haoli000/tttns/main/generated/install.sh | bash
@@ -19,16 +15,24 @@ curl -L https://raw.githubusercontent.com/haoli000/tttns/main/generated/install.
 Specific version:
 
 ```bash
-curl -L https://raw.githubusercontent.com/haoli000/tttns/main/generated/install.sh | bash -s 0.0.4
+curl -L https://raw.githubusercontent.com/haoli000/tttns/main/generated/install.sh | bash -s 0.2.4
 ```
 
-The script will install the binary into `$HOME/bin` folder by default, you can override this by setting
-`$CUSTOM_INSTALL` environment variable
+The script installs into `$HOME/bin` by default. Override with `$CUSTOM_INSTALL`.
 
-### Manual download
+### Manual Download
 
-Get the archive that fits your system from the [Releases](https://github.com/haoli000/tttns/releases) page and
-extract the binary into a folder that is mentioned in your `$PATH` variable.
+Get the archive for your platform from [Releases](https://github.com/haoli000/tttns/releases) and place the binary in your `$PATH`.
+
+### Build from Source
+
+Requires Go 1.26+:
+
+```bash
+git clone https://github.com/haoli000/tttns.git
+cd tttns
+make build
+```
 
 ## Usage
 
@@ -37,95 +41,99 @@ tttns [file|-] [flags]
 tttns [command]
 ```
 
-## Available Commands
+All commands accept either a filename or stdin (via pipe or `-`). Output defaults to YAML; use `-j` for JSON.
 
-- `cdr`: Print all CDR header info or use its sub commands
-- `completion`: Generate the autocompletion script for the specified shell
-- `file`: Print CDR file header info or use its sub commands
-- `help`: Help about any command
-- `version`: Print the version number of tttns
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `tttns [file]` | Print file header + all CDR headers |
+| `tttns file [file]` | Print file header only |
+| `tttns cdr [file]` | Print all CDR headers |
+| `tttns cdr count [file]` | Print number of CDRs |
+| `tttns cdr header [file] [index]` | Print a specific CDR header (default: 1) |
+| `tttns cdr dump [file] [index]` | Dump raw CDR content to stdout (default: 1) |
+| `tttns version` | Print version |
+
+For `header` and `dump`, if a single argument is provided it is treated as an index (reading from stdin) if numeric, or as a filename (with index defaulting to 1) otherwise.
 
 ## Flags
 
-- `-h, --help`: Display help for tttns
-- `-j, --json`: Output in JSON format (except for cdr dump)
-
-## Detailed Command Information
-
-### cdr Command
-
-The `cdr` command is used to print and manipulate CDR (Charging Data Record) information.
-
-Usage:
-
-```bash
-tttns cdr [file|-] [flags]
-tttns cdr [command]
-```
-
-Flags:
-
-- `-h, --help`: Display help for the cdr command
-- `-j, --json`: Output in JSON format
-
-#### Available Subcommands
-
-1. **count**: Get the number of CDRs in a file
-
-   ```bash
-   tttns cdr count [file|-]
-   ```
-
-2. **dump**: Dump the raw content of CDR to stdout
-
-   ```bash
-   tttns cdr dump [file|-] [index|1]
-   ```
-
-3. **header**: Print CDR header info
-
-   ```bash
-   tttns cdr header [file|-] [index|1]
-   ```
-
-For more information about a specific subcommand, use:
-
-```bash
-tttns cdr [subcommand] --help
-```
+- `-j, --json`: Output in JSON format (does not apply to `cdr dump`)
+- `-h, --help`: Display help
 
 ## Examples
 
-1. Get the number of CDRs in a file:
+Print file summary:
 
-   ```bash
-   tttns cdr count example.cdr
-   ```
+```bash
+tttns example.cdr
+tttns -j example.cdr
+```
 
-2. Print CDR header info of the 1st CDR:
+Count CDRs:
 
-   ```bash
-   tttns cdr header example.cdr 1
-   cat example.cdr | tttns cdr header 1
-   ```
+```bash
+tttns cdr count example.cdr
+```
 
-3. Dump the raw content of the 2nd CDR to stdout:
+Inspect a specific CDR header:
 
-   ```bash
-   tttns cdr dump example.cdr 2
-   cat example.cdr | tttns cdr dump 2
-   ```
+```bash
+tttns cdr header example.cdr 3
+cat example.cdr | tttns cdr header 3
+```
 
-4. Print CDR header info in JSON format:
-  
-   ```bash
-   tttns cdr header example.cdr 1 --json
-   ```
+Dump raw CDR content (e.g., pipe to [xchf](https://github.com/haoli000/xchf) for BER decoding):
+
+```bash
+tttns cdr dump example.cdr 2 | xchf
+cat example.cdr | tttns cdr dump 2 | xchf
+```
+
+JSON output:
+
+```bash
+tttns cdr header -j example.cdr 1
+```
+
+## Sample Output
+
+```yaml
+header_info:
+  file_length: 49982
+  header_length: 54
+  high_release_version: "15.10"
+  low_release_version: "15.10"
+  file_opening_timestamp: 18/5 03:14:00+0000
+  last_cdr_append_timestamp: 18/5 03:14:00+0000
+  number_of_cdrs_in_file: 100
+  file_sequence_number: 2808926
+  file_closure_trigger_reason: 0 - Normal closure (Undefined normal closure reason)
+  node_ip_address: 10.244.190.107
+  lost_cdr_indicator: No CDRs have been lost
+cdr_info:
+  number_of_cdrs: 100
+  cdr_headers:
+    - cdr_length: 501
+      release_version: "15.10"
+      data_record_format: BER
+      ts_number: TS32.274
+```
+
+## Development
+
+```bash
+make check    # fmt + vet + staticcheck + test + govulncheck
+make build    # build binary
+make test     # run tests
+make lint     # fmt + vet + staticcheck
+```
 
 ## License
 
 Apache-2.0.
 
-## Notes
+## Acknowledgements
 
-The project has been scaffolded with the help of [kleiner](https://github.com/can3p/kleiner).
+Scaffolded with [kleiner](https://github.com/can3p/kleiner).

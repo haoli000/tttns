@@ -24,11 +24,7 @@ package main
 import "github.com/haoli000/tttns/cmd"
 
 // https://goreleaser.com/cookbooks/using-main.version/
-var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
-)
+var version = "dev"
 
 func main() {
 	cmd.Execute(version)

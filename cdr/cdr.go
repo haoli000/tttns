@@ -5,15 +5,15 @@ package cdr
 import "github.com/kaitai-io/kaitai_struct_go_runtime/kaitai"
 
 type ThreegppCdr struct {
-	Header *ThreegppCdr_Header
-	Cdrs []*ThreegppCdr_Cdr
-	_io *kaitai.Stream
-	_root *ThreegppCdr
+	Header  *ThreegppCdr_Header
+	Cdrs    []*ThreegppCdr_Cdr
+	_io     *kaitai.Stream
+	_root   *ThreegppCdr
 	_parent interface{}
 }
+
 func NewThreegppCdr() *ThreegppCdr {
-	return &ThreegppCdr{
-	}
+	return &ThreegppCdr{}
 }
 
 func (this *ThreegppCdr) Read(io *kaitai.Stream, parent interface{}, root *ThreegppCdr) (err error) {
@@ -27,7 +27,7 @@ func (this *ThreegppCdr) Read(io *kaitai.Stream, parent interface{}, root *Three
 		return err
 	}
 	this.Header = tmp1
-	for i := 1;; i++ {
+	for i := 1; ; i++ {
 		tmp2, err := this._io.EOF()
 		if err != nil {
 			return err
@@ -44,21 +44,22 @@ func (this *ThreegppCdr) Read(io *kaitai.Stream, parent interface{}, root *Three
 	}
 	return err
 }
+
 type ThreegppCdr_Timestamp struct {
-	Month uint64
-	Date uint64
-	Hour uint64
-	Minute uint64
-	Sign bool
-	HourDeviation uint64
+	Month           uint64
+	Date            uint64
+	Hour            uint64
+	Minute          uint64
+	Sign            bool
+	HourDeviation   uint64
 	MinuteDeviation uint64
-	_io *kaitai.Stream
-	_root *ThreegppCdr
-	_parent *ThreegppCdr_Header
+	_io             *kaitai.Stream
+	_root           *ThreegppCdr
+	_parent         *ThreegppCdr_Header
 }
+
 func NewThreegppCdr_Timestamp() *ThreegppCdr_Timestamp {
-	return &ThreegppCdr_Timestamp{
-	}
+	return &ThreegppCdr_Timestamp{}
 }
 
 func (this *ThreegppCdr_Timestamp) Read(io *kaitai.Stream, parent *ThreegppCdr_Header, root *ThreegppCdr) (err error) {
@@ -105,28 +106,30 @@ func (this *ThreegppCdr_Timestamp) Read(io *kaitai.Stream, parent *ThreegppCdr_H
 }
 
 type ThreegppCdr_ReleaseVersionIdentifier_Rel int
+
 const (
-	ThreegppCdr_ReleaseVersionIdentifier_Rel__R99 ThreegppCdr_ReleaseVersionIdentifier_Rel = 0
-	ThreegppCdr_ReleaseVersionIdentifier_Rel__R4 ThreegppCdr_ReleaseVersionIdentifier_Rel = 1
-	ThreegppCdr_ReleaseVersionIdentifier_Rel__R5 ThreegppCdr_ReleaseVersionIdentifier_Rel = 2
-	ThreegppCdr_ReleaseVersionIdentifier_Rel__R6 ThreegppCdr_ReleaseVersionIdentifier_Rel = 3
-	ThreegppCdr_ReleaseVersionIdentifier_Rel__R7 ThreegppCdr_ReleaseVersionIdentifier_Rel = 4
-	ThreegppCdr_ReleaseVersionIdentifier_Rel__R8 ThreegppCdr_ReleaseVersionIdentifier_Rel = 5
-	ThreegppCdr_ReleaseVersionIdentifier_Rel__R9 ThreegppCdr_ReleaseVersionIdentifier_Rel = 6
+	ThreegppCdr_ReleaseVersionIdentifier_Rel__R99     ThreegppCdr_ReleaseVersionIdentifier_Rel = 0
+	ThreegppCdr_ReleaseVersionIdentifier_Rel__R4      ThreegppCdr_ReleaseVersionIdentifier_Rel = 1
+	ThreegppCdr_ReleaseVersionIdentifier_Rel__R5      ThreegppCdr_ReleaseVersionIdentifier_Rel = 2
+	ThreegppCdr_ReleaseVersionIdentifier_Rel__R6      ThreegppCdr_ReleaseVersionIdentifier_Rel = 3
+	ThreegppCdr_ReleaseVersionIdentifier_Rel__R7      ThreegppCdr_ReleaseVersionIdentifier_Rel = 4
+	ThreegppCdr_ReleaseVersionIdentifier_Rel__R8      ThreegppCdr_ReleaseVersionIdentifier_Rel = 5
+	ThreegppCdr_ReleaseVersionIdentifier_Rel__R9      ThreegppCdr_ReleaseVersionIdentifier_Rel = 6
 	ThreegppCdr_ReleaseVersionIdentifier_Rel__Beyond9 ThreegppCdr_ReleaseVersionIdentifier_Rel = 7
 )
+
 type ThreegppCdr_ReleaseVersionIdentifier struct {
-	ReleaseIdentifier uint64
-	VersionIdentifier uint64
-	_io *kaitai.Stream
-	_root *ThreegppCdr
-	_parent interface{}
+	ReleaseIdentifier  uint64
+	VersionIdentifier  uint64
+	_io                *kaitai.Stream
+	_root              *ThreegppCdr
+	_parent            interface{}
 	_f_threegppRelease bool
-	threegppRelease ThreegppCdr_ReleaseVersionIdentifier_Rel
+	threegppRelease    ThreegppCdr_ReleaseVersionIdentifier_Rel
 }
+
 func NewThreegppCdr_ReleaseVersionIdentifier() *ThreegppCdr_ReleaseVersionIdentifier {
-	return &ThreegppCdr_ReleaseVersionIdentifier{
-	}
+	return &ThreegppCdr_ReleaseVersionIdentifier{}
 }
 
 func (this *ThreegppCdr_ReleaseVersionIdentifier) Read(io *kaitai.Stream, parent interface{}, root *ThreegppCdr) (err error) {
@@ -147,22 +150,23 @@ func (this *ThreegppCdr_ReleaseVersionIdentifier) Read(io *kaitai.Stream, parent
 	return err
 }
 func (this *ThreegppCdr_ReleaseVersionIdentifier) ThreegppRelease() (v ThreegppCdr_ReleaseVersionIdentifier_Rel, err error) {
-	if (this._f_threegppRelease) {
+	if this._f_threegppRelease {
 		return this.threegppRelease, nil
 	}
 	this.threegppRelease = ThreegppCdr_ReleaseVersionIdentifier_Rel(ThreegppCdr_ReleaseVersionIdentifier_Rel((0 + this.ReleaseIdentifier)))
 	this._f_threegppRelease = true
 	return this.threegppRelease, nil
 }
+
 type ThreegppCdr_IpAddress struct {
 	IpAddress string
-	_io *kaitai.Stream
-	_root *ThreegppCdr
-	_parent *ThreegppCdr_Header
+	_io       *kaitai.Stream
+	_root     *ThreegppCdr
+	_parent   *ThreegppCdr_Header
 }
+
 func NewThreegppCdr_IpAddress() *ThreegppCdr_IpAddress {
-	return &ThreegppCdr_IpAddress{
-	}
+	return &ThreegppCdr_IpAddress{}
 }
 
 func (this *ThreegppCdr_IpAddress) Read(io *kaitai.Stream, parent *ThreegppCdr_Header, root *ThreegppCdr) (err error) {
@@ -174,12 +178,12 @@ func (this *ThreegppCdr_IpAddress) Read(io *kaitai.Stream, parent *ThreegppCdr_H
 	if err != nil {
 		return err
 	}
-	tmp13 = tmp13
 	this.IpAddress = string(tmp13)
 	return err
 }
 
 type ThreegppCdr_ReleaseIdentifierExtension_Rel int
+
 const (
 	ThreegppCdr_ReleaseIdentifierExtension_Rel__R10 ThreegppCdr_ReleaseIdentifierExtension_Rel = 0
 	ThreegppCdr_ReleaseIdentifierExtension_Rel__R11 ThreegppCdr_ReleaseIdentifierExtension_Rel = 1
@@ -189,15 +193,16 @@ const (
 	ThreegppCdr_ReleaseIdentifierExtension_Rel__R15 ThreegppCdr_ReleaseIdentifierExtension_Rel = 5
 	ThreegppCdr_ReleaseIdentifierExtension_Rel__R16 ThreegppCdr_ReleaseIdentifierExtension_Rel = 6
 )
+
 type ThreegppCdr_ReleaseIdentifierExtension struct {
 	ThreegppRelease ThreegppCdr_ReleaseIdentifierExtension_Rel
-	_io *kaitai.Stream
-	_root *ThreegppCdr
-	_parent interface{}
+	_io             *kaitai.Stream
+	_root           *ThreegppCdr
+	_parent         interface{}
 }
+
 func NewThreegppCdr_ReleaseIdentifierExtension() *ThreegppCdr_ReleaseIdentifierExtension {
-	return &ThreegppCdr_ReleaseIdentifierExtension{
-	}
+	return &ThreegppCdr_ReleaseIdentifierExtension{}
 }
 
 func (this *ThreegppCdr_ReleaseIdentifierExtension) Read(io *kaitai.Stream, parent interface{}, root *ThreegppCdr) (err error) {
@@ -214,14 +219,16 @@ func (this *ThreegppCdr_ReleaseIdentifierExtension) Read(io *kaitai.Stream, pare
 }
 
 type ThreegppCdr_Cdr_Encoding int
+
 const (
-	ThreegppCdr_Cdr_Encoding__Ber ThreegppCdr_Cdr_Encoding = 1
+	ThreegppCdr_Cdr_Encoding__Ber          ThreegppCdr_Cdr_Encoding = 1
 	ThreegppCdr_Cdr_Encoding__UnalignedPer ThreegppCdr_Cdr_Encoding = 2
-	ThreegppCdr_Cdr_Encoding__AlignedPer ThreegppCdr_Cdr_Encoding = 3
-	ThreegppCdr_Cdr_Encoding__Xml ThreegppCdr_Cdr_Encoding = 4
+	ThreegppCdr_Cdr_Encoding__AlignedPer   ThreegppCdr_Cdr_Encoding = 3
+	ThreegppCdr_Cdr_Encoding__Xml          ThreegppCdr_Cdr_Encoding = 4
 )
 
 type ThreegppCdr_Cdr_Ts int
+
 const (
 	ThreegppCdr_Cdr_Ts__Number32005 ThreegppCdr_Cdr_Ts = 0
 	ThreegppCdr_Cdr_Ts__Number32015 ThreegppCdr_Cdr_Ts = 1
@@ -248,22 +255,23 @@ const (
 	ThreegppCdr_Cdr_Ts__Number28201 ThreegppCdr_Cdr_Ts = 23
 	ThreegppCdr_Cdr_Ts__Number28202 ThreegppCdr_Cdr_Ts = 24
 )
+
 type ThreegppCdr_Cdr struct {
-	CdrLength uint16
-	Version *ThreegppCdr_ReleaseVersionIdentifier
-	DataRecordFormat uint64
-	TsNumber ThreegppCdr_Cdr_Ts
+	CdrLength                  uint16
+	Version                    *ThreegppCdr_ReleaseVersionIdentifier
+	DataRecordFormat           uint64
+	TsNumber                   ThreegppCdr_Cdr_Ts
 	ReleaseIdentifierExtension *ThreegppCdr_ReleaseIdentifierExtension
-	CdrContent []byte
-	_io *kaitai.Stream
-	_root *ThreegppCdr
-	_parent *ThreegppCdr
-	_f_cdrEncoding bool
-	cdrEncoding ThreegppCdr_Cdr_Encoding
+	CdrContent                 []byte
+	_io                        *kaitai.Stream
+	_root                      *ThreegppCdr
+	_parent                    *ThreegppCdr
+	_f_cdrEncoding             bool
+	cdrEncoding                ThreegppCdr_Cdr_Encoding
 }
+
 func NewThreegppCdr_Cdr() *ThreegppCdr_Cdr {
-	return &ThreegppCdr_Cdr{
-	}
+	return &ThreegppCdr_Cdr{}
 }
 
 func (this *ThreegppCdr_Cdr) Read(io *kaitai.Stream, parent *ThreegppCdr, root *ThreegppCdr) (err error) {
@@ -293,7 +301,7 @@ func (this *ThreegppCdr_Cdr) Read(io *kaitai.Stream, parent *ThreegppCdr, root *
 	}
 	this.TsNumber = ThreegppCdr_Cdr_Ts(tmp18)
 	this._io.AlignToByte()
-	if (this.Version.ReleaseIdentifier == 7) {
+	if this.Version.ReleaseIdentifier == 7 {
 		tmp19 := NewThreegppCdr_ReleaseIdentifierExtension()
 		err = tmp19.Read(this._io, this, this._root)
 		if err != nil {
@@ -305,43 +313,43 @@ func (this *ThreegppCdr_Cdr) Read(io *kaitai.Stream, parent *ThreegppCdr, root *
 	if err != nil {
 		return err
 	}
-	tmp20 = tmp20
 	this.CdrContent = tmp20
 	return err
 }
 func (this *ThreegppCdr_Cdr) CdrEncoding() (v ThreegppCdr_Cdr_Encoding, err error) {
-	if (this._f_cdrEncoding) {
+	if this._f_cdrEncoding {
 		return this.cdrEncoding, nil
 	}
 	this.cdrEncoding = ThreegppCdr_Cdr_Encoding(ThreegppCdr_Cdr_Encoding((0 + this.DataRecordFormat)))
 	this._f_cdrEncoding = true
 	return this.cdrEncoding, nil
 }
+
 type ThreegppCdr_Header struct {
-	FileLength uint32
-	HeaderLength uint32
-	HighReleaseVersionIdentifier *ThreegppCdr_ReleaseVersionIdentifier
-	LowReleaseVersionIdentifier *ThreegppCdr_ReleaseVersionIdentifier
-	FileOpeningTimestamp *ThreegppCdr_Timestamp
-	LastCdrAppendTimestamp *ThreegppCdr_Timestamp
-	NumberOfCdrsInFile uint32
-	FileSequenceNumber uint32
-	FileClosureTriggerReason uint8
-	NodeIpAddress *ThreegppCdr_IpAddress
-	LostCdrIndicator uint8
-	LengthOfCdrRouteingFilter uint16
-	CdrRouteingFilter string
-	LengthOfPrivateExtension uint16
-	PrivateExtension string
+	FileLength                     uint32
+	HeaderLength                   uint32
+	HighReleaseVersionIdentifier   *ThreegppCdr_ReleaseVersionIdentifier
+	LowReleaseVersionIdentifier    *ThreegppCdr_ReleaseVersionIdentifier
+	FileOpeningTimestamp           *ThreegppCdr_Timestamp
+	LastCdrAppendTimestamp         *ThreegppCdr_Timestamp
+	NumberOfCdrsInFile             uint32
+	FileSequenceNumber             uint32
+	FileClosureTriggerReason       uint8
+	NodeIpAddress                  *ThreegppCdr_IpAddress
+	LostCdrIndicator               uint8
+	LengthOfCdrRouteingFilter      uint16
+	CdrRouteingFilter              string
+	LengthOfPrivateExtension       uint16
+	PrivateExtension               string
 	HighReleaseIdentifierExtension *ThreegppCdr_ReleaseIdentifierExtension
-	LowReleaseIdentifierExtension *ThreegppCdr_ReleaseIdentifierExtension
-	_io *kaitai.Stream
-	_root *ThreegppCdr
-	_parent *ThreegppCdr
+	LowReleaseIdentifierExtension  *ThreegppCdr_ReleaseIdentifierExtension
+	_io                            *kaitai.Stream
+	_root                          *ThreegppCdr
+	_parent                        *ThreegppCdr
 }
+
 func NewThreegppCdr_Header() *ThreegppCdr_Header {
-	return &ThreegppCdr_Header{
-	}
+	return &ThreegppCdr_Header{}
 }
 
 func (this *ThreegppCdr_Header) Read(io *kaitai.Stream, parent *ThreegppCdr, root *ThreegppCdr) (err error) {
@@ -418,7 +426,6 @@ func (this *ThreegppCdr_Header) Read(io *kaitai.Stream, parent *ThreegppCdr, roo
 	if err != nil {
 		return err
 	}
-	tmp33 = tmp33
 	this.CdrRouteingFilter = string(tmp33)
 	tmp34, err := this._io.ReadU2be()
 	if err != nil {
@@ -429,9 +436,8 @@ func (this *ThreegppCdr_Header) Read(io *kaitai.Stream, parent *ThreegppCdr, roo
 	if err != nil {
 		return err
 	}
-	tmp35 = tmp35
 	this.PrivateExtension = string(tmp35)
-	if (this.HighReleaseVersionIdentifier.ReleaseIdentifier == 7) {
+	if this.HighReleaseVersionIdentifier.ReleaseIdentifier == 7 {
 		tmp36 := NewThreegppCdr_ReleaseIdentifierExtension()
 		err = tmp36.Read(this._io, this, this._root)
 		if err != nil {
@@ -439,7 +445,7 @@ func (this *ThreegppCdr_Header) Read(io *kaitai.Stream, parent *ThreegppCdr, roo
 		}
 		this.HighReleaseIdentifierExtension = tmp36
 	}
-	if (this.HighReleaseVersionIdentifier.ReleaseIdentifier == 7) {
+	if this.HighReleaseVersionIdentifier.ReleaseIdentifier == 7 {
 		tmp37 := NewThreegppCdr_ReleaseIdentifierExtension()
 		err = tmp37.Read(this._io, this, this._root)
 		if err != nil {

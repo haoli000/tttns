@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -37,16 +36,8 @@ The name is simply derived from the first letters of 32297.`,
 		}
 		content := cdr.GetContent(fileName)
 		fileInfo := cdr.ToFileInfo(content)
-		jsonBytes, err := json.MarshalIndent(fileInfo, "", "    ")
-		if err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
-		}
-		if jsonOutput, _ := cmd.Flags().GetBool("json"); jsonOutput {
-			cdr.PrettyPrintJSON(jsonBytes)
-		} else {
-			cdr.PrettyPrintYAML(jsonBytes)
-		}
+		jsonOutput, _ := cmd.Flags().GetBool("json")
+		cdr.PrintOutput(jsonOutput, fileInfo)
 	}}
 
 func Execute(version string) {

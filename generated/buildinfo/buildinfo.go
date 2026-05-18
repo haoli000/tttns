@@ -106,8 +106,8 @@ func ProjectName() string {
 
 func Commit() string {
 	info, _ := debug.ReadBuildInfo()
-	var rev string = "<none>"
-	var dirty string = ""
+	rev := "<none>"
+	dirty := ""
 	for _, v := range info.Settings {
 		if v.Key == "vcs.revision" {
 			rev = v.Value

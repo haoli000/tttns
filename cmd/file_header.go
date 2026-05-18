@@ -16,10 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
-
 	"github.com/haoli000/tttns/cdr"
 	"github.com/spf13/cobra"
 )
@@ -36,16 +32,8 @@ var fileCmd = &cobra.Command{
 		}
 		content := cdr.GetContent(fileName)
 		info := cdr.ToFileHeaderInfo(content)
-		jsonBytes, err := json.MarshalIndent(info, "", "    ")
-		if err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
-		}
-		if jsonOutput, _ := cmd.Flags().GetBool("json"); jsonOutput {
-			cdr.PrettyPrintJSON(jsonBytes)
-		} else {
-			cdr.PrettyPrintYAML(jsonBytes)
-		}
+		jsonOutput, _ := cmd.Flags().GetBool("json")
+		cdr.PrintOutput(jsonOutput, info)
 	},
 }
 

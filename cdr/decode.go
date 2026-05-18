@@ -17,11 +17,11 @@ package cdr
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/kaitai-io/kaitai_struct_go_runtime/kaitai"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
@@ -75,6 +75,10 @@ func ParseCdr(content []byte) *ThreegppCdr {
 
 func ToFileHeaderInfo(content []byte) FileHeaderInfo {
 	file := ParseCdr(content)
+	return fileToHeaderInfo(file)
+}
+
+func fileToHeaderInfo(file *ThreegppCdr) FileHeaderInfo {
 	return FileHeaderInfo{
 		FileLength:               int(file.Header.FileLength),
 		HeaderLength:             int(file.Header.HeaderLength),
@@ -92,6 +96,10 @@ func ToFileHeaderInfo(content []byte) FileHeaderInfo {
 
 func ToCdrHeaderInfo(content []byte, index uint32) CdrHeaderInfo {
 	row := getCdrContent(content, index)
+	return cdrToHeaderInfo(row)
+}
+
+func cdrToHeaderInfo(row *ThreegppCdr_Cdr) CdrHeaderInfo {
 	return CdrHeaderInfo{
 		CdrLength:          int(row.CdrLength),
 		ReleaseVersion:     toVersion(row.Version, row.ReleaseIdentifierExtension),
@@ -115,10 +123,11 @@ func DumpCdr(content []byte, index uint32, file *os.File) {
 }
 
 func ToCdrInfo(content []byte) CdrInfo {
-	cnt := CountCdrs(content)
-	var cdrHeaderInfos []CdrHeaderInfo
-	for i := uint32(1); i <= cnt; i++ {
-		info := ToCdrHeaderInfo(content, i)
+	file := ParseCdr(content)
+	cnt := file.Header.NumberOfCdrsInFile
+	cdrHeaderInfos := make([]CdrHeaderInfo, 0, cnt)
+	for i := uint32(0); i < cnt; i++ {
+		info := cdrToHeaderInfo(file.Cdrs[i])
 		cdrHeaderInfos = append(cdrHeaderInfos, info)
 	}
 	return CdrInfo{
@@ -128,60 +137,80 @@ func ToCdrInfo(content []byte) CdrInfo {
 }
 
 func ToFileInfo(content []byte) FileInfo {
+	file := ParseCdr(content)
+	cnt := file.Header.NumberOfCdrsInFile
+	cdrHeaderInfos := make([]CdrHeaderInfo, 0, cnt)
+	for i := uint32(0); i < cnt; i++ {
+		cdrHeaderInfos = append(cdrHeaderInfos, cdrToHeaderInfo(file.Cdrs[i]))
+	}
 	return FileInfo{
-		HeaderInfo: ToFileHeaderInfo(content),
-		CdrInfo:    ToCdrInfo(content),
+		HeaderInfo: fileToHeaderInfo(file),
+		CdrInfo: CdrInfo{
+			NumberOfCDRs: int(cnt),
+			CdrHeaders:   cdrHeaderInfos,
+		},
 	}
 }
 
 func isOutputToTerminal() bool {
 	o, _ := os.Stdout.Stat()
-	if (o.Mode() & os.ModeCharDevice) == os.ModeCharDevice { //Terminal
-		//Display info to the terminal
-		return true
-	}
-	return false
+	return (o.Mode() & os.ModeCharDevice) == os.ModeCharDevice
 }
 
-func PrettyPrintYAML(json []byte) {
+func PrintOutput(jsonOutput bool, v any) {
+	jsonBytes, err := json.MarshalIndent(v, "", "    ")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
+	if jsonOutput {
+		prettyPrintJSON(jsonBytes)
+	} else {
+		prettyPrintYAML(jsonBytes)
+	}
+}
+
+func initYqLogger() {
 	backend := logging.SetBackend(logging.NewLogBackend(os.Stderr, "", log.LstdFlags))
 	backend.SetLevel(logging.CRITICAL, "")
 	yqlib.GetLogger().SetBackend(backend)
+}
+
+func prettyPrintYAML(jsonData []byte) {
+	initYqLogger()
 	decoder := yqlib.NewJSONDecoder()
-	decoder.Init(bytes.NewReader(json))
+	decoder.Init(bytes.NewReader(jsonData))
 	node, err := decoder.Decode()
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(-1)
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
 	}
 	prefs := yqlib.NewDefaultYamlPreferences()
 	prefs.ColorsEnabled = isOutputToTerminal()
 	enc := yqlib.NewYamlEncoder(prefs)
 	err = enc.Encode(os.Stdout, node)
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(-1)
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
 	}
 }
 
-func PrettyPrintJSON(json []byte) {
-	backend := logging.SetBackend(logging.NewLogBackend(os.Stderr, "", log.LstdFlags))
-	backend.SetLevel(logging.CRITICAL, "")
-	yqlib.GetLogger().SetBackend(backend)
+func prettyPrintJSON(jsonData []byte) {
+	initYqLogger()
 	decoder := yqlib.NewJSONDecoder()
-	decoder.Init(bytes.NewReader(json))
+	decoder.Init(bytes.NewReader(jsonData))
 	node, err := decoder.Decode()
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(-1)
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
 	}
 	prefs := yqlib.NewDefaultJsonPreferences()
 	prefs.ColorsEnabled = isOutputToTerminal()
 	enc := yqlib.NewJSONEncoder(prefs)
 	err = enc.Encode(os.Stdout, node)
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(-1)
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
 	}
 }
 
@@ -193,19 +222,12 @@ func toVersion(rel *ThreegppCdr_ReleaseVersionIdentifier, ext *ThreegppCdr_Relea
 }
 
 func toTimeStamp(ts *ThreegppCdr_Timestamp) string {
-	s := ""
-	if ts.Sign {
-		s = "+"
-	} else {
-		s = "-"
+	sign := "+"
+	if !ts.Sign {
+		sign = "-"
 	}
-	dev := fn(ts.HourDeviation) + fn(ts.MinuteDeviation)
-	time := fn(ts.Hour) + ":" + fn(ts.Minute) + ":00"
-	return strconv.FormatInt(int64(int(ts.Date)), 10) + "/" + strconv.FormatInt(int64(int(ts.Month)), 10) + " " + time + s + dev
-}
-
-func fn(num uint64) string {
-	return fmt.Sprintf("%02d", num)
+	return fmt.Sprintf("%d/%d %02d:%02d:00%s%02d%02d",
+		ts.Date, ts.Month, ts.Hour, ts.Minute, sign, ts.HourDeviation, ts.MinuteDeviation)
 }
 
 func toFileClosureTriggerReason(num uint8) string {
@@ -236,50 +258,40 @@ func toFileClosureTriggerReason(num uint8) string {
 }
 
 func byteArrayToIPv4(byteArray []byte) string {
-	// Remove leading bytes with value 0xFF
 	startIndex := 0
 	for startIndex < len(byteArray) && byteArray[startIndex] == 0xFF {
 		startIndex++
 	}
-	// Extract the first four bytes
-	var bytes []byte
+	var ipBytes []byte
 	if startIndex+4 <= len(byteArray) {
-		bytes = byteArray[startIndex : startIndex+4]
+		ipBytes = byteArray[startIndex : startIndex+4]
 	} else {
-		// Handle case where there are fewer than 4 bytes after removing leading 0xFF bytes
-		bytes = byteArray[startIndex:]
-		for len(bytes) < 4 {
-			bytes = append(bytes, 0)
+		ipBytes = byteArray[startIndex:]
+		for len(ipBytes) < 4 {
+			ipBytes = append(ipBytes, 0)
 		}
 	}
-	// Convert bytes to IPv4 format
-	return fmt.Sprintf("%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3])
+	return fmt.Sprintf("%d.%d.%d.%d", ipBytes[0], ipBytes[1], ipBytes[2], ipBytes[3])
 }
 
 func decodeLostCdrIndicator(value uint8) string {
-	msb := value >> 7         // Get the value of the most significant bit
-	lowerBits := value & 0x7F // Get the value of the lower 7 bits
+	msb := value >> 7
+	lowerBits := value & 0x7F
 
-	switch msb {
-	case 0:
+	if msb == 0 {
 		if lowerBits == 0 {
 			return "No CDRs have been lost"
 		} else if lowerBits <= 126 {
 			return fmt.Sprintf("CGF has identified that %d CDR(s) were lost, while it is unknown whether more CDRs were lost", lowerBits)
-		} else {
-			return "CGF has identified that 127 or more CDRs were lost, while it is unknown whether more CDRs were lost"
 		}
-	case 1:
-		if lowerBits == 0 {
-			return "CDRs have been lost but CGF cannot determine the number of lost CDRs"
-		} else if lowerBits <= 126 {
-			return fmt.Sprintf("CGF has calculated the number of lost CDRs as %d", lowerBits)
-		} else {
-			return "CGF has calculated the number of lost CDRs to be 127 or more"
-		}
-	default:
-		return "Invalid input"
+		return "CGF has identified that 127 or more CDRs were lost, while it is unknown whether more CDRs were lost"
 	}
+	if lowerBits == 0 {
+		return "CDRs have been lost but CGF cannot determine the number of lost CDRs"
+	} else if lowerBits <= 126 {
+		return fmt.Sprintf("CGF has calculated the number of lost CDRs as %d", lowerBits)
+	}
+	return "CGF has calculated the number of lost CDRs to be 127 or more"
 }
 
 func toCdrEncoding(num uint64) string {

@@ -1,6 +1,6 @@
 module github.com/haoli000/tttns
 
-go 1.22.2
+go 1.26.1
 
 require (
 	github.com/can3p/kleiner v0.0.12

@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -32,37 +31,31 @@ var headerCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		fileName := "-"
-		indexArg := "1"
+		var index uint64 = 1
 		if len(args) == 1 {
-			indexArg = args[0]
+			if n, err := strconv.ParseUint(args[0], 10, 32); err == nil {
+				index = n
+			} else {
+				fileName = args[0]
+			}
 		} else if len(args) > 1 {
 			fileName = args[0]
-			indexArg = args[1]
+			n, err := strconv.ParseUint(args[1], 10, 32)
+			if err != nil {
+				fmt.Println("Error:", err)
+				os.Exit(3)
+			}
+			index = n
 		}
-		index, err := strconv.ParseUint(indexArg, 10, 32)
-		if indexArg == "-" && len(args) == 1 {
-			index = 1
-		} else if err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(3)
-		}
-		if index < 1 || index > (1<<32)-1 {
+		if index < 1 {
 			fmt.Println("Error: Index must be an integer starting from 1")
 			os.Exit(3)
 		}
 
 		content := cdr.GetContent(fileName)
 		info := cdr.ToCdrHeaderInfo(content, uint32(index))
-		jsonBytes, err := json.MarshalIndent(info, "", "    ")
-		if err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
-		}
-		if jsonOutput, _ := cmd.Flags().GetBool("json"); jsonOutput {
-			cdr.PrettyPrintJSON(jsonBytes)
-		} else {
-			cdr.PrettyPrintYAML(jsonBytes)
-		}
+		jsonOutput, _ := cmd.Flags().GetBool("json")
+		cdr.PrintOutput(jsonOutput, info)
 	},
 }
 
